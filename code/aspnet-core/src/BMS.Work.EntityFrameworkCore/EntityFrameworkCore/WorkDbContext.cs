@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BMS.Work.EntityFrameworkCore.Configurations.Menus;
+using BMS.Work.Menus;
+using Microsoft.EntityFrameworkCore;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -51,6 +53,9 @@ public class WorkDbContext :
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
 
+    //Menu
+    public DbSet<Menu> Menus { get; set; }
+
     #endregion
 
     public WorkDbContext(DbContextOptions<WorkDbContext> options)
@@ -82,5 +87,6 @@ public class WorkDbContext :
         //    b.ConfigureByConvention(); //auto configure for the base class props
         //    //...
         //});
+        builder.ApplyConfiguration(new MenuConfigurations());
     }
 }
