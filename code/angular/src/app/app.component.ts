@@ -107,8 +107,51 @@ export class AppComponent implements OnInit {
     })
       .subscribe({
         next: (res) => {
-          console.log(res)
+          const root = this.convertListToTree(res.items);
+          this.routes.navMenuService$.next(root.items);
+          // console.log(this.routes.navMenuService$.value)
+        },
+        error: (err) => {
+
         }
       })
+  }
+
+  completeNode(id: string, node: any, list: any[]) {
+    node.items = list.filter(x => x['parentId'] == id).sort(x => x.order).map(x => {
+      if (x.isGroup) {
+        let childNode = {
+          label: x.label,
+          icon: x.iconClass,
+          items: []
+        };
+        this.completeNode(x.id, childNode, list);
+        return childNode;
+      } else {
+        if (x.url) {
+          return {
+            label: x.label,
+            icon: x.iconClass,
+            url: x.url
+          };
+        } else {
+          return {
+            label: x.label,
+            icon: x.iconClass,
+            routerLink: [x.routerLink]
+          };
+        }
+      }
+    });
+  }
+
+  convertListToTree<T>(list: T[]) {
+    let rootNode = { items: [] };
+    this.completeNode(null, rootNode, list);
+    return rootNode;
+  }
+
+  login() {
+    this.authService.navigateToLogin();
   }
 }

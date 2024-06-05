@@ -23,21 +23,21 @@ namespace BMS.Work.Menus
         public MenuAppService(
             IRepository<Menu, Guid> repository,
             IOpenIddictApplicationRepository _openIddictApplicationRepository,
-            MenuOptions menuOptions,
+            //MenuOptions menuOptions,
             IDataFilter dataFilter
             ) : base(repository)
         {
             this._openIddictApplicationRepository = _openIddictApplicationRepository;
-            this._menuOptions = menuOptions;
+            //this._menuOptions = menuOptions;
             this.dataFilter = dataFilter;
         }
 
         public override async Task<MenuDto> CreateAsync(CreateUpdateMenuDto input)
         {
-            if(input.ParentId != null)
+            if (input.ParentId != null)
             {
                 var parentItem = await Repository.GetAsync(input.ParentId.Value);
-                if(!parentItem.IsGroup)
+                if (!parentItem.IsGroup)
                 {
                     throw new BusinessException();
                 }
@@ -48,9 +48,9 @@ namespace BMS.Work.Menus
 
         public override async Task<PagedResultDto<MenuDto>> GetListAsync(GetListMenuDto input)
         {
-            if (!_menuOptions.MultiTenant)
-            {
-                using(dataFilter.Disable<IMultiTenant>())
+            //if (!_menuOptions.MultiTenant)
+            //{
+                using (dataFilter.Disable<IMultiTenant>())
                 {
                     var menus = await Repository.GetListAsync(x => x.ClientId == input.ClientId);
                     return new PagedResultDto<MenuDto>
@@ -59,23 +59,23 @@ namespace BMS.Work.Menus
                         TotalCount = menus.Count
                     };
                 }
-            }
-            else
-            {
-                var menus = await Repository.GetListAsync(x => x.ClientId == input.ClientId);
-                return new PagedResultDto<MenuDto>
-                {
-                    Items = ObjectMapper.Map<List<Menu>, List<MenuDto>>(menus),
-                    TotalCount = menus.Count
-                };
-            }
+            //}
+            //else
+            //{
+            //    var menus = await Repository.GetListAsync(x => x.ClientId == input.ClientId);
+            //    return new PagedResultDto<MenuDto>
+            //    {
+            //        Items = ObjectMapper.Map<List<Menu>, List<MenuDto>>(menus),
+            //        TotalCount = menus.Count
+            //    };
+            //}
         }
 
         public override async Task DeleteAsync(Guid id)
         {
             var allMenus = await Repository.GetListAsync();
             var menu = allMenus.FirstOrDefault(x => x.Id == id);
-            if(menu != null)
+            if (menu != null)
             {
                 var children = FindChildren(allMenus, id);
                 var ids = children.Select(x => x.Id).ToList();
@@ -84,12 +84,12 @@ namespace BMS.Work.Menus
             }
         }
 
-        private List<Menu> FindChildren(List<Menu> allMenus,Guid parentid)
+        private List<Menu> FindChildren(List<Menu> allMenus, Guid parentid)
         {
             List<Menu> children = new List<Menu>();
-            for(int i = 0;i< allMenus.Count;i++)
+            for (int i = 0; i < allMenus.Count; i++)
             {
-                if(allMenus[i].ParentId == parentid)
+                if (allMenus[i].ParentId == parentid)
                 {
                     children.Add(allMenus[i]);
                     var grandChildMenu = FindChildren(allMenus, allMenus[i].Id);
